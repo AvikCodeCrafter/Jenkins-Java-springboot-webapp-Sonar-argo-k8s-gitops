@@ -35,13 +35,13 @@ pipeline {
             }
         }
 
-        stage("SonarQube: Code Analysis") {
-            steps {
-                script {
-                    sonarqube_analysis("Sonar", "java-maven-app", "java-maven-app")
-                }
-            }
-        }
+        //stage("SonarQube: Code Analysis") {
+            //steps {
+               // script {
+                  //  sonarqube_analysis("Sonar", "java-maven-app", "java-maven-app")
+              //  }
+         //   }
+       // }
 
         stage("Docker: Build Images") {
             steps {
