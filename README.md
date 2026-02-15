@@ -49,15 +49,11 @@ Hurray !! Access the application on `http://<ip-address>:8010` make sure to open
 
 ### **EKS Installation**
 
-- ☸️ [AWS-EKS Deployment](EKS-Cluster-Setup.md)
+- ☸️ [AWS-EKS Deployment-Install](EKS-Cluster-Setup.md)
 
 ### **Jenkins Installation** 
 
-- 🚀 [Jenkins-CI/CD Pipeline](JENKINS_PIPELINE.md)
-
-
-
-
+- 🚀 [Jenkins-CI/CD Installtion](JenkinsInstall.md)
 
 ## Next Steps
 
