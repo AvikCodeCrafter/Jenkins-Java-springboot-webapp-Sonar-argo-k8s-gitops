@@ -223,7 +223,7 @@ Hurray !! Now you can access the `SonarQube Server` on `http://<ip-address>:9000
 
 --------------------------------------------------------------------------
 
-# 🚀 (Optional) Install Sonarqube as Docker Container. :) Much Easy Right 
+# 🚀 (Optional) Install Sonarqube as Docker Container :) Much Easy Right 
 
 - <b id="Sonar">Install and configure SonarQube (Master machine)</b>
 ```bash
