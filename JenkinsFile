@@ -10,8 +10,7 @@ pipeline {
 
 
     parameters {
-        string(name: 'BACKEND_DOCKER_TAG', defaultValue: '', description: 'Backend Docker Tag')
-        string(name: 'FRONTEND_DOCKER_TAG', defaultValue: '', description: 'Frontend Docker Tag')
+        string(name: 'DOCKER_TAG', defaultValue: '', description: 'Backend Docker Tag')
     }
 
     stages {
@@ -46,11 +45,8 @@ pipeline {
         stage("Docker: Build Images") {
             steps {
                 script {
-                    dir('backend') {
+                    dir('dockertag') {
                         docker_build("java-web-app", "${params.BACKEND_DOCKER_TAG}", "thatgeekcontainer")
-                    }
-                    dir('frontend') {
-                        docker_build("java-web-app", "${params.FRONTEND_DOCKER_TAG}", "thatgeekcontainer")
                     }
                 }
             }
