@@ -57,5 +57,20 @@
                        --ssh-access \
                        --ssh-public-key=eks-nodegroup-key 
   ```
+- <b>Create Complete Cluster in One Command - Best method (Master machine)</b>
+ ```bash
+   eksctl create cluster \
+  --name java-web-app \
+  --region us-east-1 \
+  --version 1.34 \
+  --nodegroup-name java-web-app \
+  --node-type t3.medium \
+  --nodes 2 \
+  --nodes-min 2 \
+  --nodes-max 3 \
+  --node-volume-size 30 \
+  --ssh-access \
+  --ssh-public-key mykey
+  ```
 > [!Note]
->  Make sure the ssh-public-key "eks-nodegroup-key is available in your aws account"
+>  Make sure the ssh-public-key "eks-nodegroup-key or mykey(second approach if used)is available in your aws account"
