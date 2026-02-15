@@ -3,14 +3,8 @@
 pipeline {
     agent any
 
-    // environment{
-       //  SONAR_HOME = tool "Sonar"
-   // }
-
-
-
     parameters {
-        string(name: 'DOCKER_TAG', defaultValue: '', description: 'Backend Docker Tag')
+        string(name: 'DOCKER_TAG', defaultValue: '', description: 'Docker Tag')
     }
 
     stages {
@@ -34,44 +28,33 @@ pipeline {
             }
         }
 
-        //stage("SonarQube: Code Analysis") {
-            //steps {
-               // script {
-                  //  sonarqube_analysis("Sonar", "java-maven-app", "java-maven-app")
-              //  }
-         //   }
-       // }
-
-        stage("Docker: Build Images") {
+        stage("Docker: Build & Push") {
             steps {
                 script {
-                    dir('dockertag') {
-                        docker_build("java-web-app", "${params.BACKEND_DOCKER_TAG}", "thatgeekcontainer")
-                    }
-                }
-            }
-        }
+                    // Calculate tag ONCE
+                    tag = params.DOCKER_TAG?.trim() ? params.DOCKER_TAG : "${BUILD_NUMBER}"
 
-        stage("Docker: Push to DockerHub") {
-            steps {
-                script {
-                    docker_push("java-web-app", "${params.BACKEND_DOCKER_TAG}", "thatgeekcontainer")
-                    docker_push("java-web-app", "${params.FRONTEND_DOCKER_TAG}", "thatgeekcontainer")
+                    docker_build("java-web-app", tag, "thatgeekcontainer")
+                    docker_push("java-web-app", tag, "thatgeekcontainer")
                 }
             }
         }
 
         stage('Update Deployment File') {
             steps {
+                script {
+                    tag = params.DOCKER_TAG?.trim() ? params.DOCKER_TAG : "${BUILD_NUMBER}"
+                }
+
                 withCredentials([string(credentialsId: 'github', variable: 'GITHUB_TOKEN')]) {
                     sh """
                         git config user.email "avikbanerjee1992Z@gmail.com"
                         git config user.name "Avik Banerjee"
 
-                        sed -i "s/replaceImageTag/${BUILD_NUMBER}/g" GitOps/deployment.yml
+                        sed -i "s/replaceImageTag/${tag}/g" GitOps/deployment.yml
 
                         git add GitOps/deployment.yml
-                        git commit -m "Update deployment image to version ${BUILD_NUMBER}"
+                        git commit -m "Update deployment image to version ${tag}"
                         git push https://${GITHUB_TOKEN}@github.com/AvikCodeCrafter/Jenkins-Java-springboot-webapp-Sonar-argo-k8s-gitops.git HEAD:main
                     """
                 }
