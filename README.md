@@ -45,7 +45,7 @@ docker build -t java-springboot-webapp:v1 .
 docker run -d -p 8010:8080 -t java-springboot-webapp:v1
 ```
 
-Hurray !! Access the application on `http://<ip-address>:8010`
+Hurray !! Access the application on `http://<ip-address>:8010` make sure to open port 8010 on security group 
 
 
 ## Next Steps
