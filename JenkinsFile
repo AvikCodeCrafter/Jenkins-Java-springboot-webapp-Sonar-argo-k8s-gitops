@@ -48,7 +48,7 @@ pipeline {
 
                 withCredentials([string(credentialsId: 'github', variable: 'GITHUB_TOKEN')]) {
                     sh """
-                        git config user.email "avikbanerjee1992Z@gmail.com"
+                        git config user.email "avikbanerjee1992@gmail.com"
                         git config user.name "Avik Banerjee"
 
                         sed -i "s/replaceImageTag/${tag}/g" GitOps/deployment.yml
