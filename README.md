@@ -50,23 +50,174 @@ Hurray !! Access the application on `http://<ip-address>:8010` make sure to open
 
 ## Next Steps
 
-### Configure a Sonar Server locally
+# 🚀 SonarQube Installation Guide (Ubuntu EC2 - Production Style)
 
+This guide explains how to install and configure SonarQube 10.x on an
+Ubuntu EC2 instance properly.
+
+------------------------------------------------------------------------
+
+# 📌 Prerequisites
+
+-   Ubuntu EC2 Instance
+-   Minimum 2GB RAM (4GB Recommended)
+-   Open Port 9000 in Security Group
+
+------------------------------------------------------------------------
+
+# 🛠️ Step 1: Install Required Packages
+
+``` bash
+sudo apt update -y
+sudo apt install unzip wget openjdk-17-jdk -y
 ```
-System Requirements
-Java 17+ (Oracle JDK, OpenJDK, or AdoptOpenJDK)
-Hardware Recommendations:
-   Minimum 2 GB RAM
-   2 CPU cores
-sudo apt update && sudo apt install unzip -y
-adduser sonarqube
-wget https://binaries.sonarsource.com/Distribution/sonarqube/sonarqube-10.4.1.88267.zip
-unzip *
-chown -R sonarqube:sonarqube /opt/sonarqube
-chmod -R 775 /opt/sonarqube
+
+Verify Java installation:
+
+``` bash
+java -version
+```
+
+------------------------------------------------------------------------
+
+# 👤 Step 2: Create SonarQube User
+
+SonarQube should NOT run as root.
+
+``` bash
+sudo adduser --system --no-create-home --group --disabled-login sonarqube
+```
+
+------------------------------------------------------------------------
+
+# 📥 Step 3: Download SonarQube
+
+``` bash
+cd /opt
+sudo wget https://binaries.sonarsource.com/Distribution/sonarqube/sonarqube-10.4.1.88267.zip
+```
+
+------------------------------------------------------------------------
+
+# 📦 Step 4: Unzip and Rename
+
+``` bash
+sudo unzip sonarqube-10.4.1.88267.zip
+sudo mv sonarqube-10.4.1.88267 sonarqube
+```
+
+------------------------------------------------------------------------
+
+# 🔐 Step 5: Set Proper Permissions
+
+``` bash
+sudo chown -R sonarqube:sonarqube /opt/sonarqube
+sudo chmod -R 755 /opt/sonarqube
+```
+
+------------------------------------------------------------------------
+
+# ⚙️ Step 6: Configure System Limits (Mandatory)
+
+### Update Kernel Parameters
+
+``` bash
+sudo nano /etc/sysctl.conf
+```
+
+Add:
+
+    vm.max_map_count=262144
+    fs.file-max=65536
+
+Apply changes:
+
+``` bash
+sudo sysctl -p
+```
+
+------------------------------------------------------------------------
+
+### Update Security Limits
+
+``` bash
+sudo nano /etc/security/limits.conf
+```
+
+Add:
+
+    sonarqube   -   nofile   65536
+    sonarqube   -   nproc    4096
+
+------------------------------------------------------------------------
+
+# ▶️ Step 7: Start SonarQube
+
+Switch to sonarqube user:
+
+``` bash
+sudo su - sonarqube
 cd /opt/sonarqube/bin/linux-x86-64
 ./sonar.sh start
 ```
+
+Check status:
+
+``` bash
+./sonar.sh status
+```
+
+------------------------------------------------------------------------
+
+# 🌐 Access SonarQube
+
+Open in browser:
+
+http://`<EC2-Public-IP>`{=html}:9000
+
+Default Credentials:
+
+Username: admin\
+Password: admin
+
+------------------------------------------------------------------------
+
+# 🚀 (Optional) Enable SonarQube as Systemd Service
+
+Create service file:
+
+``` bash
+sudo nano /etc/systemd/system/sonarqube.service
+```
+
+Add:
+
+    [Unit]
+    Description=SonarQube Service
+    After=network.target
+
+    [Service]
+    Type=forking
+    User=sonarqube
+    Group=sonarqube
+    ExecStart=/opt/sonarqube/bin/linux-x86-64/sonar.sh start
+    ExecStop=/opt/sonarqube/bin/linux-x86-64/sonar.sh stop
+    Restart=always
+    LimitNOFILE=65536
+    LimitNPROC=4096
+
+    [Install]
+    WantedBy=multi-user.target
+
+Reload and enable:
+
+``` bash
+sudo systemctl daemon-reload
+sudo systemctl enable sonarqube
+sudo systemctl start sonarqube
+sudo systemctl status sonarqube
+```
+
 
 Hurray !! Now you can access the `SonarQube Server` on `http://<ip-address>:9000` 
 
