@@ -26,7 +26,8 @@ The above maven target stroes the artifacts to the `target` directory. You can e
 ** Note: To avoid issues with local setup, Java versions and other dependencies, I would recommend the docker way. **
 
 
-### Execute locally (Java 11 needed) and access the application on http://localhost:8080
+### Execute locally (Java 17 needed) and access the application on http://localhost:8080 or on EIP/EC2 Public IP on port 8080.
+make sure to open port 8080 on security group 
 
 ```
 java -jar target/spring-boot-web.jar
