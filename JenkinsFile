@@ -9,66 +9,73 @@ pipeline {
 
     stages {
 
-        stage("Workspace Cleanup") {
+        stage("Checkout") {
             steps {
                 cleanWs()
-            }
-        }
-
-        stage('Git: Code Checkout') {
-            steps {
                 git branch: 'main',
-                url: 'https://github.com/AvikCodeCrafter/Jenkins-Java-springboot-webapp-Sonar-argo-k8s-gitops.git'
+                    url: 'https://github.com/AvikCodeCrafter/Jenkins-Java-springboot-webapp-Sonar-argo-k8s-gitops.git'
             }
         }
 
-        stage('Build and Test') {
+        stage("Build") {
             steps {
                 sh 'mvn clean package'
             }
         }
 
-        stage("Docker: Build & Push") {
+        stage("Docker Build & Push") {
             steps {
                 script {
-                    // Define tag ONCE here
                     env.TAG = params.DOCKER_TAG?.trim() ? params.DOCKER_TAG : "${BUILD_NUMBER}"
-
                     docker_build("java-web-app", env.TAG, "thatgeekcontainer")
                     docker_push("java-web-app", env.TAG, "thatgeekcontainer")
                 }
             }
         }
 
-        stage("Update Deployment File") {
+        stage("Deploy to Dev") {
             steps {
-                withCredentials([usernamePassword(
-                    credentialsId: 'git-jenkins',
-                    usernameVariable: 'GIT_USER',
-                    passwordVariable: 'GIT_PASS'
-                )]) {
-                    sh """
-                        git config user.email "avikbanerjee1992@gmail.com"
-                        git config user.name "Avik Banerjee"
+                echo "Deploying ${env.TAG} to DEV environment"
+                sh """
+                sed -i "s/replaceImageTag/${env.TAG}/g" GitOps/dev/deployment.yml
+                """
+            }
+        }
 
-                        sed -i "s/replaceImageTag/${env.TAG}/g" GitOps/deployment.yml
+        stage("Deploy to Stage") {
+            steps {
+                echo "Deploying ${env.TAG} to STAGE environment"
+                sh """
+                sed -i "s/replaceImageTag/${env.TAG}/g" GitOps/stage/deployment.yml
+                """
+            }
+        }
 
-                        git add GitOps/deployment.yml
-                        git commit -m "Update deployment image to version ${env.TAG}"
-
-                        git push https://${GIT_USER}:${GIT_PASS}@github.com/AvikCodeCrafter/Jenkins-Java-springboot-webapp-Sonar-argo-k8s-gitops.git HEAD:main
-                    """
+        stage("Manual Approval for Production") {
+            steps {
+                timeout(time: 15, unit: 'MINUTES') {
+                    input message: "Deploy version ${env.TAG} to PRODUCTION?",
+                          ok: "Approve Production Deploy"
                 }
+            }
+        }
+
+        stage("Deploy to Production") {
+            steps {
+                echo "Deploying ${env.TAG} to PROD environment"
+                sh """
+                sed -i "s/replaceImageTag/${env.TAG}/g" GitOps/prod/deployment.yml
+                """
             }
         }
     }
 
     post {
         success {
-            echo "✅ Pipeline completed successfully"
+            echo "✅ Production-grade pipeline completed"
         }
         failure {
-            echo "❌ Pipeline failed"
+            echo "❌ Deployment failed"
         }
     }
 }
