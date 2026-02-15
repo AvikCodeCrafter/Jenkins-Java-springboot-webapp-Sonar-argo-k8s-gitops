@@ -1,4 +1,5 @@
-- <b id="EKS">Create EKS Cluster on AWS (Master machine)</b>
+  # EKS Cluster on AWS (Master machine)
+  
   - IAM user with **access keys and secret access keys**
   - AWSCLI should be configured (<a href="https://github.com/DevMadhup/DevOps-Tools-Installations/blob/main/AWSCLI/AWSCLI.sh">Setup AWSCLI</a>)
   ```bash
