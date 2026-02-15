@@ -3,6 +3,12 @@
 pipeline {
     agent any
 
+    environment {
+    SONAR_HOME = tool('SonarScanner')
+}
+
+
+
     parameters {
         string(name: 'BACKEND_DOCKER_TAG', defaultValue: '', description: 'Backend Docker Tag')
         string(name: 'FRONTEND_DOCKER_TAG', defaultValue: '', description: 'Frontend Docker Tag')
