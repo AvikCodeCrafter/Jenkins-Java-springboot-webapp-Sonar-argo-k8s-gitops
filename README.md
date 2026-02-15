@@ -228,5 +228,7 @@ Hurray !! Now you can access the `SonarQube Server` on `http://<ip-address>:9000
 - <b id="Sonar">Install and configure SonarQube (Master machine)</b>
 ```bash
 docker run -itd --name SonarQube-Server -p 9000:9000 sonarqube:lts-community
+docker run -itd --name SonarQube-Server -p 9000:9000 sonarqube:community   #Recommmended to use 
+
 ```
 
