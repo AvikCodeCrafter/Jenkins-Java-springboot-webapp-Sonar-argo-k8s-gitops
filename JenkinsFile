@@ -31,8 +31,10 @@ pipeline {
         stage("Docker Build & Push") {
             steps {
                 script {
-                    // Set tag globally
+                    // Global tag for entire pipeline
                     env.TAG = params.DOCKER_TAG?.trim() ? params.DOCKER_TAG : "${BUILD_NUMBER}"
+
+                    echo "Building Docker image with tag: ${env.TAG}"
 
                     docker_build("java-web-app", env.TAG, "thatgeekcontainer")
                     docker_push("java-web-app", env.TAG, "thatgeekcontainer")
@@ -44,7 +46,8 @@ pipeline {
             steps {
                 timeout(time: 20, unit: 'MINUTES') {
                     input message: "Deploy version ${env.TAG} to PRODUCTION?",
-                          ok: "Approve & Deploy"
+                          ok: "Approve & Deploy",
+                          submitter: "admin"
                 }
             }
         }
@@ -64,8 +67,14 @@ pipeline {
                         sed -i "s/replaceImageTag/${env.TAG}/g" GitOps/deployment.yml
 
                         git add GitOps/deployment.yml
-                        git commit -m "PROD: Deploy version ${env.TAG}"
-                        git push https://${GIT_USER}:${GIT_PASS}@github.com/AvikCodeCrafter/Jenkins-Java-springboot-webapp-Sonar-argo-k8s-gitops.git HEAD:main
+
+                        # Only commit if there are changes
+                        if git diff --cached --quiet; then
+                            echo "No changes detected. Skipping commit."
+                        else
+                            git commit -m "PROD: Deploy version ${env.TAG}"
+                            git push https://${GIT_USER}:${GIT_PASS}@github.com/AvikCodeCrafter/Jenkins-Java-springboot-webapp-Sonar-argo-k8s-gitops.git HEAD:main
+                        fi
                     """
                 }
             }
@@ -78,6 +87,9 @@ pipeline {
         }
         failure {
             echo "❌ Production deployment failed"
+        }
+        always {
+            echo "Pipeline finished for version: ${env.TAG}"
         }
     }
 }
