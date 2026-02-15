@@ -4,20 +4,25 @@ pipeline {
     agent any
 
     parameters {
-        string(name: 'DOCKER_TAG', defaultValue: '', description: 'Docker Tag')
+        string(name: 'DOCKER_TAG', defaultValue: '', description: 'Docker Tag (Optional)')
     }
 
     stages {
 
-        stage("Checkout") {
+        stage("Workspace Cleanup") {
             steps {
                 cleanWs()
+            }
+        }
+
+        stage("Checkout Code") {
+            steps {
                 git branch: 'main',
                     url: 'https://github.com/AvikCodeCrafter/Jenkins-Java-springboot-webapp-Sonar-argo-k8s-gitops.git'
             }
         }
 
-        stage("Build") {
+        stage("Build Application") {
             steps {
                 sh 'mvn clean package'
             }
@@ -26,56 +31,53 @@ pipeline {
         stage("Docker Build & Push") {
             steps {
                 script {
+                    // Set tag globally
                     env.TAG = params.DOCKER_TAG?.trim() ? params.DOCKER_TAG : "${BUILD_NUMBER}"
+
                     docker_build("java-web-app", env.TAG, "thatgeekcontainer")
                     docker_push("java-web-app", env.TAG, "thatgeekcontainer")
                 }
             }
         }
 
-        stage("Deploy to Dev") {
-            steps {
-                echo "Deploying ${env.TAG} to DEV environment"
-                sh """
-                sed -i "s/replaceImageTag/${env.TAG}/g" GitOps/dev/deployment.yml
-                """
-            }
-        }
-
-        stage("Deploy to Stage") {
-            steps {
-                echo "Deploying ${env.TAG} to STAGE environment"
-                sh """
-                sed -i "s/replaceImageTag/${env.TAG}/g" GitOps/stage/deployment.yml
-                """
-            }
-        }
-
         stage("Manual Approval for Production") {
             steps {
-                timeout(time: 15, unit: 'MINUTES') {
+                timeout(time: 20, unit: 'MINUTES') {
                     input message: "Deploy version ${env.TAG} to PRODUCTION?",
-                          ok: "Approve Production Deploy"
+                          ok: "Approve & Deploy"
                 }
             }
         }
 
-        stage("Deploy to Production") {
+        stage("Deploy to Production (GitOps Update)") {
             steps {
-                echo "Deploying ${env.TAG} to PROD environment"
-                sh """
-                sed -i "s/replaceImageTag/${env.TAG}/g" GitOps/prod/deployment.yml
-                """
+                withCredentials([usernamePassword(
+                    credentialsId: 'git-jenkins',
+                    usernameVariable: 'GIT_USER',
+                    passwordVariable: 'GIT_PASS'
+                )]) {
+
+                    sh """
+                        git config user.email "avikbanerjee1992@gmail.com"
+                        git config user.name "Avik Banerjee"
+
+                        sed -i "s/replaceImageTag/${env.TAG}/g" GitOps/deployment.yml
+
+                        git add GitOps/deployment.yml
+                        git commit -m "PROD: Deploy version ${env.TAG}"
+                        git push https://${GIT_USER}:${GIT_PASS}@github.com/AvikCodeCrafter/Jenkins-Java-springboot-webapp-Sonar-argo-k8s-gitops.git HEAD:main
+                    """
+                }
             }
         }
     }
 
     post {
         success {
-            echo "✅ Production-grade pipeline completed"
+            echo "✅ Production deployment completed successfully"
         }
         failure {
-            echo "❌ Deployment failed"
+            echo "❌ Production deployment failed"
         }
     }
 }
