@@ -3,9 +3,9 @@
 pipeline {
     agent any
 
-    environment {
-    SONAR_HOME = tool('SonarScanner')
-}
+    environment{
+        SONAR_HOME = tool "Sonar"
+    }
 
 
 
