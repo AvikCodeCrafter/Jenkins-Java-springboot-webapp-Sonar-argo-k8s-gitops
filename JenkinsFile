@@ -31,31 +31,32 @@ pipeline {
         stage("Docker: Build & Push") {
             steps {
                 script {
-                    // Calculate tag ONCE
-                    tag = params.DOCKER_TAG?.trim() ? params.DOCKER_TAG : "${BUILD_NUMBER}"
+                    // Define tag ONCE here
+                    env.TAG = params.DOCKER_TAG?.trim() ? params.DOCKER_TAG : "${BUILD_NUMBER}"
 
-                    docker_build("java-web-app", tag, "thatgeekcontainer")
-                    docker_push("java-web-app", tag, "thatgeekcontainer")
+                    docker_build("java-web-app", env.TAG, "thatgeekcontainer")
+                    docker_push("java-web-app", env.TAG, "thatgeekcontainer")
                 }
             }
         }
 
-        stage('Update Deployment File') {
+        stage("Update Deployment File") {
             steps {
-                script {
-                    tag = params.DOCKER_TAG?.trim() ? params.DOCKER_TAG : "${BUILD_NUMBER}"
-                }
-
-                withCredentials([string(credentialsId: 'github', variable: 'GITHUB_TOKEN')]) {
+                withCredentials([usernamePassword(
+                    credentialsId: 'git-jenkins',
+                    usernameVariable: 'GIT_USER',
+                    passwordVariable: 'GIT_PASS'
+                )]) {
                     sh """
                         git config user.email "avikbanerjee1992@gmail.com"
                         git config user.name "Avik Banerjee"
 
-                        sed -i "s/replaceImageTag/${tag}/g" GitOps/deployment.yml
+                        sed -i "s/replaceImageTag/${env.TAG}/g" GitOps/deployment.yml
 
                         git add GitOps/deployment.yml
-                        git commit -m "Update deployment image to version ${tag}"
-                        git push https://${GITHUB_TOKEN}@github.com/AvikCodeCrafter/Jenkins-Java-springboot-webapp-Sonar-argo-k8s-gitops.git HEAD:main
+                        git commit -m "Update deployment image to version ${env.TAG}"
+
+                        git push https://${GIT_USER}:${GIT_PASS}@github.com/AvikCodeCrafter/Jenkins-Java-springboot-webapp-Sonar-argo-k8s-gitops.git HEAD:main
                     """
                 }
             }
