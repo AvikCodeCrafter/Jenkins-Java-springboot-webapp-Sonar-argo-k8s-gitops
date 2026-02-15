@@ -38,11 +38,11 @@ java -jar target/spring-boot-web.jar
 Build the Docker Image
 
 ```
-docker build -t ultimate-cicd-pipeline:v1 .
+docker build -t java-springboot-webapp:v1 .
 ```
 
 ```
-docker run -d -p 8010:8080 -t ultimate-cicd-pipeline:v1
+docker run -d -p 8010:8080 -t java-springboot-webapp:v1
 ```
 
 Hurray !! Access the application on `http://<ip-address>:8010`
