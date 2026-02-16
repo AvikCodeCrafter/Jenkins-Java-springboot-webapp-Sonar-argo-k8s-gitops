@@ -28,6 +28,19 @@ Jenkins → Docker Build → DockerHub\
 Jenkins → Update GitOps Manifests\
 Argo CD → Sync → Amazon EKS
 
+Developer → GitHub (App Repo)
+            ↓
+        Jenkins CI
+            ↓
+     Docker Build & Push
+            ↓
+     Update GitOps Repo
+            ↓
+        Argo CD Sync
+            ↓
+        Amazon EKS
+
+
 ------------------------------------------------------------------------
 
 # 🏗 Prerequisites
