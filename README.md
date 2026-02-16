@@ -13,7 +13,7 @@ This is a MVC architecture based application where controller returns a page wit
 
 ### 🔄 CI/CD Flow
 
-![CI/CD Flow](Assets/flow.png)
+![CI/CD Flow](Assets/CI-pipeline.png)
 
 ## Execute the application locally and access it using your browser
 
