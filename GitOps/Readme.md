@@ -8,6 +8,8 @@ deployment, CI/CD integration, and GitOps workflow.
 
 # 🎨 Architecture Diagram
 
+![DevSecOps Architecture](Assets/image.png)
+
 ``` mermaid
 flowchart LR
     Dev[Developer] -->|Push Code| GitHub
