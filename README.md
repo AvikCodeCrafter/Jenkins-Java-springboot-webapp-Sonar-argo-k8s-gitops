@@ -5,6 +5,16 @@ at the root directory of the repository.
 
 This is a MVC architecture based application where controller returns a page with title and message attributes to the view.
 
+### DevSecOps Architecture
+
+![DevSecOps Architecture](Assets/architectures.png)
+
+---
+
+### 🔄 CI/CD Flow
+
+![CI/CD Flow](Assets/flow.png)
+
 ## Execute the application locally and access it using your browser
 
 Checkout the repo and move to the directory
