@@ -7,7 +7,7 @@ This is a MVC architecture based application where controller returns a page wit
 
 ### DevSecOps Architecture
 
-![DevSecOps Architecture](Assets/CI:CD Pipeline Architecture.png)
+![DevSecOps Architecture](Assets/CI:CD-Pipeline-Architecture.png)
 
 ---
 
